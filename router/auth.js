@@ -11,13 +11,7 @@ router.use(express.json());
 router.use(cors());
 const User = require("../model/userSchema");
 
-router.get("/", async (req, res)=> {
-  res.send("test root server ");
-});
-router.get("/api/test", async (req, res)=> {
-  res.send("this is testing message ");
-  console.log("fire");
-});
+
 
 router.post("/api/register", async (req, res)=> {
   const {
