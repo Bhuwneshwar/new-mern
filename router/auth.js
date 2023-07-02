@@ -137,4 +137,117 @@ router.post("/api/contact", authentication, async (req, res)=> {
   }
 
 });
+ router.post("/api/trade/alarm",async (req, res)=> {
+  
+try {
+    console.log(req.body);
+
+    let content = req.body.info;
+    let now = req.body.now;
+
+    content = content.replace(/ nextLine /g, "\n");
+    const currencyRegex = /[Oo]perating [Cc]urrency: \s?\s?[A-Z]{2,5}/gi;
+    const coinRegex = /[A-Z]{2,5}/g;
+    const BuyRegex =
+      /[Bb]uy\s? [Tt]ime\s?\s?\s?:?\s?\s?\s?:?\s?\s?\s?(\d{1,2}:\d{2} [AP]M)/gi;
+    const BuyRegex_a = /(\d{1,2}:\d{2} [AP]M)/;
+    const SellRegex =
+      /[Ss]ell\s? [Tt]ime\s?\s?\s?:?\s?\s?\s?:?\s?\s?\s?(\d{1,2}:\d{2} [AP]M)/gi;
+    const SellRegex_a = /(\d{1,2}:\d{2} [AP]M)/;
+
+    const currency = content.match(currencyRegex);
+    console.log("currency", currency);
+    const buy_times = content.match(BuyRegex);
+    console.log(buy_times);
+    buyArray = [];
+    buy_times.forEach((time) => buyArray.push(time.match(BuyRegex_a)[0]));
+    console.log("buyArray", buyArray);
+    const sell_times = content.match(SellRegex);
+    console.log(sell_times);
+
+    sellArray = [];
+    sell_times.forEach((time) => sellArray.push(time.match(SellRegex_a)[0]));
+
+    // Create a new Date object with the current date
+    var currentDate = new Date();
+    // Get the day, month, and year
+    var day = currentDate.getDate(); // Returns the day of the month (1-31)
+    var month = currentDate.getMonth() + 1; // Returns the month (0-11), so we add 1
+    //var monthName = currentDate.toLocaleString("default", { month: "long" });
+
+    var year = currentDate.getFullYear(); // Returns the year (e.g., 2023)
+
+    // Output the results
+    console.log("Day: " + day);
+    console.log("Month: " + month);
+    console.log("Year: " + year);
+    const dt = month + " " + day + " " + year;
+    console.log(dt);
+
+    let BuyTimes = [];
+    buyArray.forEach((time) => {
+      console.log(time);
+      let foundTime = new Date(time + " " + dt);
+      let timey =
+        foundTime.getHours() +
+        ":" +
+        foundTime.getMinutes() +
+        ":" +
+        foundTime.getSeconds();
+
+      console.log("timey", timey);
+      console.log("found date", foundTime);
+      const miliDef = foundTime.getTime() - now * 1000;
+      console.log("miliDef", miliDef);
+
+      if (miliDef > 0) {
+        let secondDef = Math.floor(miliDef / 1000) - 65;
+        console.log(secondDef);
+
+        BuyTimes.push(secondDef);
+      } else {
+        //  res.send("It is old date");
+      }
+    });
+
+    let SellTimes = [];
+
+    sellArray.forEach((time) => {
+      let foundTime = new Date(time + " " + dt);
+
+      console.log(Date(time + " " + dt));
+      console.log(time + " " + dt);
+      let miliDef = foundTime.getTime() - now * 1000;
+      console.log(miliDef);
+      if (miliDef > 0) {
+        let secondDef = Math.floor(miliDef / 1000) - 65;
+        console.log(secondDef);
+
+        SellTimes.push(secondDef);
+      } else {
+        //return res.send("It is old date");
+      }
+    });
+    let currencies = [];
+    currency.forEach((cucy) => {
+      currencies.push(cucy.match(coinRegex));
+    });
+    let responses = {
+      currencies,
+
+      SellDueTimes: SellTimes,
+      BuyDueTimes: BuyTimes,
+
+      SellTimes: sellArray,
+      BuyTimes: buyArray,
+    };
+    console.log(responses);
+    return res.send(responses);
+    
+  } catch (e) {
+    console.log(e);
+        }
+ }
+
+    
 module.exports = router;
